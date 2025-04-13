@@ -43,6 +43,15 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(apiResponse, HttpStatus.BAD_REQUEST);
     }
 
+    @ExceptionHandler(InvalidTicketDetailsException.class)
+    public ResponseEntity<Object> InvalidTicket(InvalidTicketDetailsException ex,
+                                                     WebRequest request) {
+        ErrorResponse response = new ErrorResponse();
+        response.setErrorMessage(ex.getLocalizedMessage());
+        ApiResponse apiResponse = new ApiResponse(response, null);
+        return this.handleExceptionInternal(ex, apiResponse, null, HttpStatus.BAD_REQUEST, request);
+    }
+
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Object> handleUnCachedException(Exception ex,

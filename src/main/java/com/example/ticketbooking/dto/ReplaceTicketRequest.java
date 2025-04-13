@@ -1,15 +1,18 @@
 package com.example.ticketbooking.dto;
 
+import com.example.ticketbooking.entity.Ticket;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
-@EqualsAndHashCode
-public class TicketInfo {
-    private String section;
-    private String ticketNo;
+public class ReplaceTicketRequest {
+
+    private User user;
+
+    private Ticket booked;
+
+    private Ticket replace;
 }

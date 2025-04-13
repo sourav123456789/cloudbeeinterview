@@ -1,13 +1,17 @@
 package com.example.ticketbooking.service;
 
 import com.example.ticketbooking.dto.*;
+import com.example.ticketbooking.entity.Ticket;
+import com.example.ticketbooking.exceptionhandler.InvalidTicketDetailsException;
 import com.example.ticketbooking.exceptionhandler.TicketNotAvaiableExecption;
 import com.example.ticketbooking.repositry.TicketRepository;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;
 import java.util.Optional;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -39,11 +43,37 @@ public class TicketService {
         return bookedSeatBySection;
     }
 
-    public void deleteTicketForUser(String userMail) {
-          ticketRepository.deleteUserByMail(userMail);
+    public void deleteTicketForUser(User user) {
+          ticketRepository.deleteUserByMail(user);
     }
 
     public UpdateSeatRequestResponse bookSpecificTicket(UpdateSeatRequestResponse updateSeat) {
-        return ticketRepository.bookTicketBySeatNo(updateSeat);
+        Ticket ticket = new Ticket(updateSeat.getInfo().getTicketNo(), updateSeat.getUser() , updateSeat.getInfo().getSection());
+        if(ticketRepository.isTicketAvailable(ticket)) {
+            ticketRepository.bookTicketBySeatNo(ticket , updateSeat.getUser());
+            return updateSeat;
+        }
+        throw new TicketNotAvaiableExecption("Requested Ticket is not available");
+
+    }
+
+    public Set<TicketBooked> replaceTicket(@Valid ReplaceTicketRequest replaceTicketRequest) {
+        boolean booked = ticketRepository.hasBooked(replaceTicketRequest.getUser(), new
+                TicketInfo(replaceTicketRequest.getBooked().getSection() ,
+                replaceTicketRequest.getBooked().getTicketNo()));
+        if(!booked) {
+            throw new InvalidTicketDetailsException("User Has not booked the ticket");
+        }
+        boolean isTicketAvailable = ticketRepository.isTicketAvailable(replaceTicketRequest.getReplace());
+        if(!isTicketAvailable) {
+            throw new TicketNotAvaiableExecption("Ticket not available");
+        }
+
+
+        Optional<Set<TicketBooked>> ticketBookeds = ticketRepository.replaceTicket(replaceTicketRequest.getUser(),
+                replaceTicketRequest.getBooked(), replaceTicketRequest.getReplace());
+
+        return ticketBookeds.get();
+
     }
 }

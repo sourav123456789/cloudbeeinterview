@@ -8,6 +8,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Set;
+
 @RestController
 @RequestMapping("/ticket")
 @RequiredArgsConstructor
@@ -32,9 +34,13 @@ public class TicketBookingController {
     }
 
     //An API to remove a user from the train
-    @DeleteMapping("/{userMail}")
-    public ResponseEntity<Object> removeUser(@PathVariable("userMail") String userMail){
-        ticketService.deleteTicketForUser(userMail);
+    @DeleteMapping("/deletebyuser")
+    public ResponseEntity<Object> removeUser(
+            @RequestParam("userMail") String userMail,
+            @RequestParam("firstName") String firstName,
+            @RequestParam("lastName") String lastName ){
+        User user = new User(firstName , lastName , userMail);
+        ticketService.deleteTicketForUser(user);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
@@ -43,11 +49,23 @@ public class TicketBookingController {
      new tickets passed in the request body*/
     @PutMapping("/")
     public ResponseEntity<Object> updateSeat(@Valid @RequestBody UpdateSeatRequestResponse updateSeat){
-        ticketService.deleteTicketForUser(updateSeat.getUser().getEmail());
+        ticketService.deleteTicketForUser(updateSeat.getUser());
         UpdateSeatRequestResponse updateSeatRequestResponse = ticketService.bookSpecificTicket(updateSeat);
         ApiResponse apiResponse = new ApiResponse(null , updateSeatRequestResponse);
         return new ResponseEntity<>(apiResponse , HttpStatus.OK);
     }
+
+    /* Api to replace an existing ticket */
+
+    @PutMapping("/replaceTicket")
+    public ResponseEntity<Object> replaceTicket(@Valid @RequestBody ReplaceTicketRequest replaceTicketRequest) {
+        Set<TicketBooked> receipt = ticketService.replaceTicket(replaceTicketRequest);
+        ApiResponse apiResponse = new ApiResponse(null , receipt);
+        return new ResponseEntity<>(apiResponse , HttpStatus.OK);
+    }
+
+
+
 
 
 
