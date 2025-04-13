@@ -2,6 +2,7 @@ package com.example.ticketbooking.controller;
 
 import com.example.ticketbooking.dto.*;
 import com.example.ticketbooking.service.TicketService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,7 +17,7 @@ public class TicketBookingController {
 
     // This endpoint is for booking ticket
     @PostMapping("/")
-    public ResponseEntity<Object> bookTicket(@RequestBody TicketRequest ticketRequest) {
+    public ResponseEntity<Object> bookTicket(@Valid @RequestBody TicketRequest ticketRequest) {
         Receipt ticketResponse = ticketService.bookTicket(ticketRequest);
         ApiResponse apiResponse = new ApiResponse(null , ticketResponse);
         return new ResponseEntity<>(apiResponse, HttpStatus.CREATED);
@@ -41,7 +42,7 @@ public class TicketBookingController {
     /* This api will cancel all the user existing ticket and book the
      new tickets passed in the request body*/
     @PutMapping("/")
-    public ResponseEntity<Object> updateSeat(@RequestBody UpdateSeatRequestResponse updateSeat){
+    public ResponseEntity<Object> updateSeat(@Valid @RequestBody UpdateSeatRequestResponse updateSeat){
         ticketService.deleteTicketForUser(updateSeat.getUser().getEmail());
         UpdateSeatRequestResponse updateSeatRequestResponse = ticketService.bookSpecificTicket(updateSeat);
         ApiResponse apiResponse = new ApiResponse(null , updateSeatRequestResponse);
