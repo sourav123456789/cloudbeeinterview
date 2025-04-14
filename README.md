@@ -40,3 +40,26 @@ curl --location --request PUT 'http://localhost:8080/ticket/' \
         "ticketNo" : "A123"
     }
 }'
+
+
+6 - To replace the booked ticket with a different Seat.
+
+
+curl --location --request PUT 'http://localhost:8080/ticket/replaceTicket' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+    "user": {
+        "firstName": "Sourav",
+        "lastName": "Panigrahi",
+        "email": "souravpanigrahi78@gmail.com"
+    },
+    "booked": {
+        "ticketNo": "A279",
+        "section": "A"
+    },
+    "replace": {
+        "ticketNo": "A280",
+        "section": "A"
+    }
+}'
+
