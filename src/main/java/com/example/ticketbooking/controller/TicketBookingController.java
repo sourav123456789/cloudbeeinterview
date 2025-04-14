@@ -59,8 +59,8 @@ public class TicketBookingController {
 
     @PutMapping("/replaceTicket")
     public ResponseEntity<Object> replaceTicket(@Valid @RequestBody ReplaceTicketRequest replaceTicketRequest) {
-        Set<TicketBooked> receipt = ticketService.replaceTicket(replaceTicketRequest);
-        ApiResponse apiResponse = new ApiResponse(null , receipt);
+        ReplaceTicketResponse replaceTicketResponse = ticketService.replaceTicket(replaceTicketRequest);
+        ApiResponse apiResponse = new ApiResponse(null , replaceTicketResponse);
         return new ResponseEntity<>(apiResponse , HttpStatus.OK);
     }
 

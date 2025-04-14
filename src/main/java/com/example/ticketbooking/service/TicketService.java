@@ -57,7 +57,7 @@ public class TicketService {
 
     }
 
-    public Set<TicketBooked> replaceTicket(@Valid ReplaceTicketRequest replaceTicketRequest) {
+    public ReplaceTicketResponse replaceTicket(@Valid ReplaceTicketRequest replaceTicketRequest) {
         boolean booked = ticketRepository.hasBooked(replaceTicketRequest.getUser(),
                 replaceTicketRequest.getBooked());
         if(!booked) {
@@ -80,7 +80,11 @@ public class TicketService {
         Optional<Set<TicketBooked>> ticketBookeds = ticketRepository.replaceTicket(replaceTicketRequest.getUser(),
                 bookedticket, replaceTicket);
 
-        return ticketBookeds.get();
+        Set<TicketBooked> ticketBookeds1 = ticketBookeds.get();
+        ReplaceTicketResponse replaceTicketResponse = new ReplaceTicketResponse();
+        replaceTicketResponse.setUser(replaceTicketRequest.getUser());
+        replaceTicketResponse.setReceipts(ticketBookeds1);
+        return replaceTicketResponse;
 
     }
 }
