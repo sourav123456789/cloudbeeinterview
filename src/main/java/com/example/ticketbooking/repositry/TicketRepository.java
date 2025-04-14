@@ -29,6 +29,33 @@ public class TicketRepository {
         availableTicketsBySection.put("B", t2);
     }
 
+    /*
+
+     */
+
+
+    private void updateBookedTicketByUser(String email, TicketBooked ticketBooked) {
+        if (bookedTicketsByuser.containsKey(email)) {
+            Set<TicketBooked> ticketBook = bookedTicketsByuser.get(email);
+            ticketBook.add(ticketBooked);
+        } else {
+            Set<TicketBooked> s = new HashSet<>();
+            s.add(ticketBooked);
+            bookedTicketsByuser.put(email, s);
+        }
+    }
+
+    private void updateBookedTicketBySection(String section, Ticket t) {
+        if (bookedTicketsBySection.containsKey(section)) {
+            Set<Ticket> tickets1 = bookedTicketsBySection.get(section);
+            tickets1.add(t);
+        } else {
+            Set<Ticket> tickets1 = new HashSet<>();
+            tickets1.add(t);
+            bookedTicketsBySection.put(section, tickets1);
+        }
+    }
+
 
     // This method will book a ticket from one of the section based on availability
     public Optional<TicketBooked> bookTicket(User user) {
@@ -42,24 +69,10 @@ public class TicketRepository {
             ticketBooked.setSection(entry.getKey());
             ticketBooked.setPrice(20);
 
-            if (bookedTicketsByuser.containsKey(user.getEmail())) {
-                Set<TicketBooked> ticketBook = bookedTicketsByuser.get(user.getEmail());
-                ticketBook.add(ticketBooked);
-            } else {
-                Set<TicketBooked> s = new HashSet<>();
-                s.add(ticketBooked);
-                bookedTicketsByuser.put(user.getEmail(), s);
-            }
+            updateBookedTicketByUser(user.getEmail(), ticketBooked);
             value.remove(t);
             t.setBookedBy(user);
-            if (bookedTicketsBySection.containsKey(entry.getKey())) {
-                Set<Ticket> tickets1 = bookedTicketsBySection.get(entry.getKey());
-                tickets1.add(t);
-            } else {
-                Set<Ticket> tickets1 = new HashSet<>();
-                tickets1.add(t);
-                bookedTicketsBySection.put(entry.getKey(), tickets1);
-            }
+            updateBookedTicketBySection(entry.getKey(), t);
 
             break;
         }
@@ -79,7 +92,7 @@ public class TicketRepository {
 
     public Optional<BookedSeatBySection> getBookedTicketBySection(String sectionId) {
         List<SeatInfo> response = null;
-        if(bookedTicketsBySection.containsKey(sectionId)) {
+        if (bookedTicketsBySection.containsKey(sectionId)) {
             Set<Ticket> tickets = bookedTicketsBySection.get(sectionId);
             Map<User, List<TicketBooked>> ticketsByUser = new HashMap<>();
             for (Ticket t : tickets) {
@@ -108,12 +121,12 @@ public class TicketRepository {
 
 
     public void deleteUserByMail(User user) {
-        if(bookedTicketsByuser.containsKey(user.getEmail())) {
+        if (bookedTicketsByuser.containsKey(user.getEmail())) {
             Set<TicketBooked> ticketBooked = bookedTicketsByuser.get(user.getEmail());
             for (TicketBooked t : ticketBooked) {
                 Ticket t1 = new Ticket(t.getTicketNo(), user, t.getSection());
                 Set<Ticket> bookedTickets = bookedTicketsBySection.get(t.getSection());
-                if(bookedTickets != null) {
+                if (bookedTickets != null) {
                     bookedTickets.remove(t1);
                 }
                 availableTicketsBySection.get(t.getSection()).add(t1);
@@ -125,27 +138,12 @@ public class TicketRepository {
     public void bookTicketBySeatNo(Ticket ticket, User user) {
         String section = ticket.getSection();
         availableTicketsBySection.get(section).remove(ticket);
-
-        if (bookedTicketsBySection.containsKey(section)) {
-            bookedTicketsBySection.get(section).add(ticket);
-        } else {
-            Set<Ticket> tickets = new HashSet<>();
-            tickets.add(ticket);
-            bookedTicketsBySection.put(section, tickets);
-        }
-
-
-        if (bookedTicketsByuser.containsKey(user.getEmail())) {
-            bookedTicketsByuser.get(user.getEmail()).add(new TicketBooked(ticket.getTicketNo(), ticket.getSection(), 20));
-        } else {
-            Set<TicketBooked> ticketBooked = new HashSet<>();
-            ticketBooked.add(new TicketBooked(ticket.getTicketNo(), ticket.getSection(), 20));
-            bookedTicketsByuser.put(user.getEmail(), ticketBooked);
-        }
+        updateBookedTicketBySection(section, ticket);
+        updateBookedTicketByUser(user.getEmail(), new TicketBooked(ticket.getTicketNo(), ticket.getSection(), 20));
     }
 
     public boolean hasBooked(User user, TicketInfo booked) {
-        if(bookedTicketsByuser.containsKey(user.getEmail())) {
+        if (bookedTicketsByuser.containsKey(user.getEmail())) {
             Set<TicketBooked> ticketBooked = bookedTicketsByuser.get(user.getEmail());
             return ticketBooked.contains(new TicketBooked(booked.getTicketNo(), booked.getSection(), 20));
         }
@@ -164,22 +162,15 @@ public class TicketRepository {
         tickets.remove(booked);
         availableTicketsBySection.get(section).add(booked);
         Set<TicketBooked> ticketBookeds = bookedTicketsByuser.get(user.getEmail());
-        ticketBookeds.remove(new TicketBooked(booked.getTicketNo() , booked.getSection() , 20));
+        ticketBookeds.remove(new TicketBooked(booked.getTicketNo(), booked.getSection(), 20));
 
         replace.setBookedBy(user);
         String section1 = replace.getSection();
-        if(bookedTicketsBySection.containsKey(section1)) {
+        if (bookedTicketsBySection.containsKey(section1)) {
             bookedTicketsBySection.get(section1).add(replace);
         }
         availableTicketsBySection.get(section1).remove(replace);
-        if(bookedTicketsByuser.containsKey(user.getEmail())) {
-            bookedTicketsByuser.get(user.getEmail()).add(new TicketBooked(replace.getTicketNo() , replace.getSection() , 20));
-        }
-        else {
-            Set<TicketBooked> ticketBooked = bookedTicketsByuser.get(user.getEmail());
-            ticketBooked.add(new TicketBooked(replace.getTicketNo() , replace.getSection() , 20));
-            bookedTicketsByuser.put(user.getEmail() , ticketBooked);
-        }
+        updateBookedTicketByUser(user.getEmail(), new TicketBooked(replace.getTicketNo(), replace.getSection(), 20));
         return getReceipt(user.getEmail());
 
     }
