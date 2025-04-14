@@ -12,7 +12,7 @@ public class ReplaceTicketRequest {
 
     private User user;
 
-    private Ticket booked;
+    private TicketInfo booked;
 
-    private Ticket replace;
+    private TicketInfo replace;
 }

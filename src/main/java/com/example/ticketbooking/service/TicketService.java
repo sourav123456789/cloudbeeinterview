@@ -58,20 +58,27 @@ public class TicketService {
     }
 
     public Set<TicketBooked> replaceTicket(@Valid ReplaceTicketRequest replaceTicketRequest) {
-        boolean booked = ticketRepository.hasBooked(replaceTicketRequest.getUser(), new
-                TicketInfo(replaceTicketRequest.getBooked().getSection() ,
-                replaceTicketRequest.getBooked().getTicketNo()));
+        boolean booked = ticketRepository.hasBooked(replaceTicketRequest.getUser(),
+                replaceTicketRequest.getBooked());
         if(!booked) {
             throw new InvalidTicketDetailsException("User Has not booked the ticket");
         }
-        boolean isTicketAvailable = ticketRepository.isTicketAvailable(replaceTicketRequest.getReplace());
+        Ticket replaceTicket = new Ticket(replaceTicketRequest.getReplace().getTicketNo(),
+         replaceTicketRequest.getUser()
+        ,replaceTicketRequest.getReplace().getSection() );
+        Ticket bookedticket = new Ticket(
+                replaceTicketRequest.getBooked().getTicketNo(),
+                replaceTicketRequest.getUser(),
+                replaceTicketRequest.getBooked().getSection()
+        );
+        boolean isTicketAvailable = ticketRepository.isTicketAvailable(replaceTicket);
         if(!isTicketAvailable) {
             throw new TicketNotAvaiableExecption("Ticket not available");
         }
 
 
         Optional<Set<TicketBooked>> ticketBookeds = ticketRepository.replaceTicket(replaceTicketRequest.getUser(),
-                replaceTicketRequest.getBooked(), replaceTicketRequest.getReplace());
+                bookedticket, replaceTicket);
 
         return ticketBookeds.get();
 
